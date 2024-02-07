@@ -19,7 +19,7 @@ from os.path import isfile, join
 import psycopg2
 from alive_progress import alive_bar
 
-from japanAirAnalytics.store import config
+from store import config
 
 
 class oldHourlyDataFormat:

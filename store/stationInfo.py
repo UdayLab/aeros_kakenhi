@@ -14,7 +14,7 @@
 import csv
 import sys
 import psycopg2
-from japanAirAnalytics.store import config
+from store import config
 from alive_progress import alive_bar
 
 # SQL query to create stationInformation table

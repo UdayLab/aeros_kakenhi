@@ -46,9 +46,9 @@ class createDataFrame:
     ------------------------------------
 
                Format:
-                        >>>  python3 createDataFrame.py <startDate> <endDate>
+                        >>>  python3 createDataFrame.py <startDate> <endDate> <pollutant> <saveFileName>
                Example:
-                        >>>  python3 createDataFrame.py '2018-01-01' '2023-10-31'
+                        >>>  python3 createDataFrame.py '2018-01-01' '2023-10-31' 'pm25' 'data.csv'
 
                         .. note:: Specify the name of the database in database.ini file
 
@@ -57,9 +57,9 @@ class createDataFrame:
     -----------------------------------------
     .. code-block:: python
 
-             from japanAirAnalytics.ETL import createDataFrame as db
+             from ETL import createDataFrame as db
 
-             obj = db(startDate, endDate)
+             obj = db(startDate, endDate, pollutant='pm25')
 
              timestamps = obj.createTimeStampColumnInDataFrame()
 
@@ -70,14 +70,14 @@ class createDataFrame:
 
     """
 
-    def __init__(self, startDate: str, endDate: str):
+    def __init__(self, startDate: str, endDate: str, pollutant='pm25'):
         self.startDate = datetime.strptime(startDate, '%Y-%m-%d')
         self.endDate = datetime.strptime(endDate, '%Y-%m-%d')
         self.dataframe = None
         self.timeStamps = None
         self.stationIDs = None
         self.pm25Data = None
-        self.param = 'pm25'
+        self.pollutant = pollutant
         self.time = []
 
     def createTimeStampColumnInDataFrame(self) -> None:
@@ -134,7 +134,7 @@ class createDataFrame:
             with alive_bar(len(stationIDs)) as bar:
                 for station in stationIDs:
                     bar()
-                    query = 'select obsdate,pm25 from ' + tableName + ' where stationid = %s ORDER BY obsdate asc'
+                    query = 'select obsdate,' + self.pollutant +' from ' + tableName + ' where stationid = %s ORDER BY obsdate asc'
                     # print(station[0])
                     cur.execute(query, (station[0],))
                     pm25Data = cur.fetchall()
@@ -180,18 +180,20 @@ if __name__ == "__main__":
     
     """
     try:
-        if len(sys.argv) != 3:
+        if len(sys.argv) != 5:
             raise ValueError("Incorrect number of input parameters")
 
         startDate = sys.argv[1]
         endDate = sys.argv[2]
-        obj = createDataFrame(startDate, endDate)
+        pollutant = sys.argv[3]
+        obj = createDataFrame(startDate, endDate,pollutant)
         obj.createTimeStampColumnInDataFrame()
         obj.generateDataFrameForAllStations()
-        obj.save("pm25_20180101_20231031.csv")
+        #obj.save("pm25_20180101_20231031.csv")
+        obj.save(sys.argv[4])
 
     except ValueError as ve:
-        print(f"Error: {ve}. Format: startDate = 2018-01-01, endDate = 2023-10-31")
+        print(f"Error: {ve}. Format: startDate = 2018-01-01, endDate = 2023-10-31, pollutant = 'pm25'")
     except Exception as e:
         print(f"An error occurred: {e}")
 

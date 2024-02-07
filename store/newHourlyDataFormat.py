@@ -16,7 +16,7 @@ import sys
 from os import listdir
 from os.path import isfile, join
 import psycopg2
-from japanAirAnalytics.store import config
+from store import config
 from alive_progress import alive_bar
 
 class newHourlyDataFormat:
