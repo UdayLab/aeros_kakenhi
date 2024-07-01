@@ -1,90 +1,29 @@
-# This Program takes input as folder containing various csv files in it. Reads all csv files and handles missing dates and inserts the data into a PostgreSQL database.
-#
-# **Importing this japanAirAnalytics data files in a Python program**
-# ---------------------------------------------------------------------
-#
-#
-#           from japanAirAnalytics.store import newHourlyDataFormat as db
-#
-#           obj = db()
-#
-#           obj.insertData(inputDataFolder)
-
-
 import csv
 import sys
 from os import listdir
 from os.path import isfile, join
 import psycopg2
-import config
 from alive_progress import alive_bar
 
+
 class newHourlyDataFormat:
-    """
-    :Description: This program reads CSV files from the specified folder, handles missing dates, and inserts the data into the hourly_observations table in a PostgreSQL database.
-
-    :param  inputDataFolder: str :
-                            The path to the folder containing CSV files. Example: newHourlyDataFormat.insert('/path/to/inputDataFolder')
-    :Attributes:
-            None
-
-    :Methods:
-            insert(inputDataFolder): Reads CSV files, handles missing dates, and inserts data into the hourly_observations table.
-
-
-    **Methods to execute japanAirAnalytics on terminal**
-    -------------------------------------------------------
-
-                Format:
-                        >>>python3 newHourlyDataFormat.py <inputDataFolder>
-                Example:
-                        >>>python3 newHourlyDataFormat.py inputDataFolder
-
-                        .. note:: Specify the name of the database in database.ini file
-
-
-    **Importing this japanAirAnalytics data files into a python program**
-    ------------------------------------------------------------------------
-    .. code-block:: python
-
-            from japanAirAnalytics.store import newHourlyDataFormat as db
-
-            obj = db()
-
-            obj.insertData(inputDataFolder)
-
-    """
-
     def insert(inputDataFolder):
-
-        """
-        - This method first, list all CSV files in the specified folder and Iterate over each file.
-        - Second, Handle missing dates and insert updated data into the hourly_observations table.
-        - Third, Commit changes to the database.
-
-        :param  inputDataFolder: str :
-                            The path to the folder containing CSV files.
-
-        Returns:
-            None
-
-
-        """
         files = [f for f in listdir(inputDataFolder) if isfile(join(inputDataFolder, f))]
         with alive_bar(len(files)) as bar:
             for file in files:
                 bar()
-
-                # Connect to the PostgreSQL database server
                 conn = None
                 try:
-                    # read connection parameters
-                    params = config()
-
-                    # connect to the PostgreSQL server
-                    # print('Connecting to the PostgreSQL database...')
-                    conn = psycopg2.connect(**params)
-
+                    DB_NAME = "soramame_final"
+                    DB_USER = "temp"
+                    DB_PASS = "temp@14916"
+                    DB_HOST = "163.143.165.141"
+                    DB_PORT = "5432"
+                    conn = psycopg2.connect(database=DB_NAME,
+                                            user=DB_USER,
+                                            password=DB_PASS,
+                                            host=DB_HOST,
+                                            port=DB_PORT)
                     # create a cursor
                     cur = conn.cursor()
 
@@ -111,7 +50,7 @@ class newHourlyDataFormat:
 
                         if date == '':
                             # writing query
-                            query = 'insert into hourly_observations values(' + row[0] + ',\'' + row[1] + ' ' + row[
+                            query = 'insert into data values(' + row[0] + ',\'' + row[1] + ' ' + row[
                                 2] + ':00:00\'' + ',' + \
                                     row[3] + ',' + row[4] + ',' + row[5] + ',' \
                                     + row[6] + ',' + row[7] + ',' + row[8] + ',' + row[9] + ',' + row[10] + ',' + \
@@ -122,7 +61,7 @@ class newHourlyDataFormat:
                                         18] + ")"
                         else:
                             # writing query
-                            query = 'insert into hourly_observations values(' + row[0] + ',' + date + ',' + \
+                            query = 'insert into data values(' + row[0] + ',' + date + ',' + \
                                     row[3] + ',' + row[4] + ',' + row[5] + ',' \
                                     + row[6] + ',' + row[7] + ',' + row[8] + ',' + row[9] + ',' + row[10] + ',' + row[
                                         11] + ',' + \
@@ -137,6 +76,7 @@ class newHourlyDataFormat:
                     # close the communication with the PostgreSQL
                     cur.close()
 
+
                 except (Exception, psycopg2.DatabaseError) as error:
                     print(error, inputDataFolder + '/' + file)
 
@@ -144,6 +84,7 @@ class newHourlyDataFormat:
                     if conn is not None:
                         conn.close()
                         # print('Database connection closed.')
+
 
 
 if __name__ == '__main__':
@@ -155,5 +96,3 @@ if __name__ == '__main__':
         print("Format: python3  stationInfo.py  fileName")
     else:
         newHourlyDataFormat.insert(sys.argv[1])
-
-
